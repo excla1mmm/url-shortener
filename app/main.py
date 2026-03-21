@@ -2,14 +2,18 @@ from fastapi import FastAPI, HTTPException, Depends
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 from prometheus_fastapi_instrumentator import Instrumentator
+from contextlib import asynccontextmanager
 import string, random
 from . import models, schemas, database
 
-app = FastAPI(title='URL Shortener')
+@asynccontextmanager
+async def lifespan(app):
+    models.Base.metadata.create_all(bind=database.engine)
+    yield
 
-Instrumentator().instrument(app).expose(app)  # /metrics endpoint
+app = FastAPI(title='URL Shortener', lifespan=lifespan)
 
-models.Base.metadata.create_all(bind=database.engine)  # создаём таблицы при старте
+Instrumentator().instrument(app).expose(app)
 
 def generate_code(length=6):
     chars = string.ascii_letters + string.digits
