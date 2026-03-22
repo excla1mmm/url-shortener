@@ -39,6 +39,11 @@ resource "aws_instance" "app" {
   iam_instance_profile   = aws_iam_instance_profile.app.name
   key_name               = aws_key_pair.app.key_name
 
+  # Require IMDSv2 — prevents SSRF attacks from accessing instance metadata
+  metadata_options {
+    http_tokens = "required"
+  }
+
   # Script that runs on first boot — installs Docker
   user_data = <<-EOF
     #!/bin/bash
@@ -64,6 +69,9 @@ resource "aws_db_instance" "postgres" {
 
   db_subnet_group_name   = aws_db_subnet_group.main.name
   vpc_security_group_ids = [aws_security_group.db.id]
+
+  # Enable logging for security and debugging
+  enabled_cloudwatch_logs_exports = ["postgresql", "upgrade"]
 
   skip_final_snapshot = true  # for learning project — no snapshot on delete
   deletion_protection = false # allows us to destroy with terraform destroy
