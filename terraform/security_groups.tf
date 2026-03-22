@@ -11,13 +11,13 @@ resource "aws_security_group" "app" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  # SSH — only from your IP
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["${var.my_ip}/32"]
-  }
+  # SSH — open for GitHub Actions, key-based auth only (0.0.0.0 - studying project purposes only)
+ingress {
+  from_port   = 22
+  to_port     = 22
+  protocol    = "tcp"
+  cidr_blocks = ["0.0.0.0/0"]
+}
 
   # Outbound traffic — fully allowed
   egress {
