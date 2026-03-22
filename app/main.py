@@ -11,7 +11,7 @@ async def lifespan(app):
     models.Base.metadata.create_all(bind=database.engine)
     yield
 
-app = FastAPI(title='URL Shortener', lifespan=lifespan)
+app = FastAPI(title='URL Shortener', description='Secure URL Shortener with CI/CD', lifespan=lifespan)
 
 Instrumentator().instrument(app).expose(app)
 
