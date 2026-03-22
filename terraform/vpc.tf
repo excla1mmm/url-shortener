@@ -7,10 +7,11 @@ resource "aws_vpc" "main" {
 }
 
 # Public subnet — EC2 will be here
+# nosemgrep: terraform.aws.security.aws-subnet-has-public-ip-address.aws-subnet-has-public-ip-address
 resource "aws_subnet" "public" {
   vpc_id                  = aws_vpc.main.id
   cidr_block              = "10.0.1.0/24"
-  map_public_ip_on_launch = true # nosemgrep: terraform.aws.security.aws-subnet-has-public-ip-address.aws-subnet-has-public-ip-address
+  map_public_ip_on_launch = true
   availability_zone       = "ap-southeast-1a"
 
   tags = { Name = "url-shortener-public" }
