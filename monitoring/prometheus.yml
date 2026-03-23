@@ -5,7 +5,7 @@ scrape_configs:
   # Scrape our FastAPI app — /metrics endpoint
   - job_name: 'url-shortener'
     static_configs:
-      - targets: ['10.0.1.177:80']
+      - targets: ['10.0.1.177:8080']
 
   # Scrape system metrics from EC2
   - job_name: 'node-exporter'
