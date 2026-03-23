@@ -24,10 +24,32 @@ jobs:
             echo ${{ secrets.GITHUB_TOKEN }} | \
               docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
+            mkdir -p /home/ubuntu/url-shortener-monitoring
+
+            cat > /home/ubuntu/url-shortener-monitoring/prometheus.yml <<'EOF'
+            global:
+              scrape_interval: 15s
+
+            scrape_configs:
+              - job_name: 'url-shortener'
+                static_configs:
+                  - targets: ['localhost:8080']
+
+              - job_name: 'node-exporter'
+                static_configs:
+                  - targets: ['localhost:9100']
+            EOF
+
             docker pull ghcr.io/${{ github.repository }}:latest
 
             docker stop url-shortener || true
             docker rm url-shortener || true
+            docker stop prometheus || true
+            docker rm prometheus || true
+            docker stop grafana || true
+            docker rm grafana || true
+            docker stop node-exporter || true
+            docker rm node-exporter || true
 
             docker run -d \
               --name url-shortener \
@@ -36,5 +58,30 @@ jobs:
               -e DATABASE_URL=postgresql://urluser:${{ secrets.DB_PASSWORD }}@${{ secrets.RDS_ENDPOINT }}/urldb \
               ghcr.io/${{ github.repository }}:latest
 
+            docker run -d \
+              --name prometheus \
+              --restart unless-stopped \
+              --network host \
+              -v /home/ubuntu/url-shortener-monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro \
+              prom/prometheus:latest \
+              --config.file=/etc/prometheus/prometheus.yml
+
+            docker run -d \
+              --name grafana \
+              --restart unless-stopped \
+              --network host \
+              grafana/grafana:latest
+
+            docker run -d \
+              --name node-exporter \
+              --restart unless-stopped \
+              --network host \
+              --pid host \
+              -v /:/host:ro,rslave \
+              prom/node-exporter:latest \
+              --path.rootfs=/host
+
             sleep 5
-            curl -f http://localhost/health || exit 1
+            curl -f http://localhost:8080/health || exit 1
+            curl -f http://localhost:9090/-/healthy || exit 1
+            curl -f http://localhost:3000/api/health || exit 1
