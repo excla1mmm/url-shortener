@@ -1,12 +1,16 @@
 name: CD
 
 on:
-  push:
+  workflow_run:
+    workflows: ["CI"]
+    types:
+      - completed
     branches: [main]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -17,18 +21,14 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            # Login to GHCR
             echo ${{ secrets.GITHUB_TOKEN }} | \
               docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-            # Pull new image
             docker pull ghcr.io/${{ github.repository }}:latest
 
-            # Stop and remove old container
             docker stop url-shortener || true
             docker rm url-shortener || true
 
-            # Run new container
             docker run -d \
               --name url-shortener \
               --restart unless-stopped \
@@ -36,6 +36,5 @@ jobs:
               -e DATABASE_URL=postgresql://urluser:${{ secrets.DB_PASSWORD }}@${{ secrets.RDS_ENDPOINT }}/urldb \
               ghcr.io/${{ github.repository }}:latest
 
-            # Check that app started
             sleep 5
             curl -f http://localhost/health || exit 1
