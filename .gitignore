@@ -5,6 +5,7 @@ __pycache__/
 *.pem
 .idea/
 test.db
+.DS_Store
 
 # Terraform
 .terraform/
