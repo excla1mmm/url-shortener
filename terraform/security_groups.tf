@@ -10,6 +10,13 @@ resource "aws_security_group" "app" {
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
+  # HTTPS — accessible to everyone
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 
   # SSH — open for GitHub Actions, key-based auth only (0.0.0.0 - studying project purposes only)
   ingress {
