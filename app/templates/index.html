@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>URL Shortener</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="logo">url-shortener</div>
+    <h1>Shorten<br><span>any link.</span></h1>
+    <p class="subtitle">// paste a long url. get a short one.</p>
+  </div>
+
+  <div class="card">
+    <div class="input-group">
+      <div class="url-input-wrapper">
+        <span class="url-prefix">https://</span>
+        <input type="text" id="urlInput" inputmode="url" autocomplete="off" spellcheck="false" placeholder="example.com/path" />
+      </div>
+      <button id="shortenBtn" onclick="shorten()">SHORTEN →</button>
+    </div>
+
+    <div class="result" id="result">
+      <div class="result-label">// short url</div>
+      <div class="result-url">
+        <a id="shortUrl" href="#" target="_blank"></a>
+        <button class="copy-btn" id="copyBtn" onclick="copyUrl()">COPY</button>
+      </div>
+    </div>
+
+    <div class="error-msg" id="errorMsg"></div>
+  </div>
+
+  <div class="footer">
+    <a href="/docs">api docs</a> &nbsp;·&nbsp;
+    <a href="https://github.com/excla1mmm/url-shortener" target="_blank">github</a>
+  </div>
+</div>
+<script src="/static/js/main.js"></script>
+</body>
+</html>
