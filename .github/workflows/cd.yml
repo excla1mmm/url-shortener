@@ -81,7 +81,21 @@ jobs:
               prom/node-exporter:latest \
               --path.rootfs=/host
 
-            sleep 5
-            curl -f http://localhost:8080/health || exit 1
-            curl -f http://localhost:9090/-/healthy || exit 1
-            curl -f http://localhost:3000/api/health || exit 1
+            check_service() {
+              local name="$1"
+              local url="$2"
+
+              for i in $(seq 1 20); do
+                if curl -fsS "$url" > /dev/null; then
+                  return 0
+                fi
+                sleep 3
+              done
+
+              docker logs "$name" --tail 100 || true
+              return 1
+            }
+
+            check_service url-shortener http://localhost:8080/health || exit 1
+            check_service prometheus http://localhost:9090/-/healthy || exit 1
+            check_service grafana http://localhost:3000/api/health || exit 1
